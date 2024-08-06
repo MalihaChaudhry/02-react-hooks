@@ -69,13 +69,6 @@ function App() {
   })
 
   React.useEffect(() => {
-    console.log('%cApp: useEffect(() => {})', 'color: LightCoral')
-    return () => {
-      console.log('%cApp: useEffect(() => {}) cleanup 🧹', 'color: LightCoral')
-    }
-  })
-
-  React.useEffect(() => {
     console.log('%cApp: useEffect(() => {}, [])', 'color: MediumTurquoise')
     return () => {
       console.log(
@@ -85,6 +78,12 @@ function App() {
     }
   }, [])
 
+  React.useEffect(() => {
+    console.log('%cApp: useEffect(() => {})', 'color: LightCoral')
+    return () => {
+      console.log('%cApp: useEffect(() => {}) cleanup 🧹', 'color: LightCoral')
+    }
+  })
   React.useEffect(() => {
     console.log('%cApp: useEffect(() => {}, [showChild])', 'color: HotPink')
     return () => {

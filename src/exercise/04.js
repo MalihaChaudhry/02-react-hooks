@@ -1,7 +1,7 @@
 // useState: tic tac toe
 // http://localhost:3000/isolated/exercise/04.js
 
-import * as React from 'react'
+import {useState} from 'react'
 
 function Board() {
   // 🐨 squares is the state for this component. Add useState for squares
