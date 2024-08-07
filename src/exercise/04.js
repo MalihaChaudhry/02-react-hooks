@@ -1,17 +1,10 @@
 // useState: tic tac toe
 // http://localhost:3000/isolated/exercise/04.js
 
-// import {useState} from 'react'
+import {useState} from 'react'
 import {useLocalStorageState} from '../utils'
 
 function Board({onClick, squares}) {
-  // const [squares, setSquares] = useLocalStorageState(
-  //   () =>
-  //     JSON.parse(window.localStorage.getItem('game')) ?? Array(9).fill(null),
-  // )
-
-  // const storage = useLocalStorageState('board', squares)
-
   function renderSquare(i) {
     return (
       <button className="square" onClick={() => onClick(i)}>
@@ -50,15 +43,63 @@ function Game() {
   const winner = calculateWinner(squares)
   const status = calculateStatus(winner, squares, nextValue)
 
+  const [history, setHistory] = useState([])
+  // const [currentlySelected, setCurrentlySelected] = useState(-2)
+
+  function currentStep(i) {
+    // setCurrentlySelected(i)
+    if (i < 0) return setSquares(Array(9).fill(null))
+    return setSquares(history[i])
+  }
+
   function selectSquare(square) {
     if (winner || squares[square]) return
     const squaresCopy = [...squares]
     squaresCopy[square] = nextValue
     setSquares(squaresCopy)
+    const historyCopy = [...history]
+    historyCopy.push(squaresCopy)
+    setHistory(historyCopy)
   }
 
   function restart() {
     setSquares(Array(9).fill(null))
+  }
+
+  function moves() {
+    let text = ''
+    const startButton = (
+      <li key="0">
+        <button
+          disabled={history.length === 0}
+          onClick={() => {
+            // setCurrentIndex(-1)
+            currentStep(-1)
+          }}
+        >
+          Go to game start {history.length === 0 ? `(current)` : ''}
+        </button>
+      </li>
+    )
+    const buttons = history.map((arr, i) => {
+      // setCurrentIndex(i)
+      let disabled = false
+      // if (i > length) disabled = true
+      if (i === 0) text = `Go to move #${i + 1}`
+      else text = `Go to move #${i + 1}`
+      if (history.length === i + 1) text += ' (current)'
+      // if (currentlySelected) text += ' (current)'
+      if (history.length === i + 1) disabled = true
+      // if (currentlySelected) disabled = true
+      return (
+        <li key={`${arr.toString()}-${i + 1}`}>
+          <button disabled={disabled} onClick={() => currentStep(i)}>
+            {text}
+          </button>
+        </li>
+      )
+    })
+    return [startButton, ...buttons]
   }
 
   return (
@@ -71,7 +112,7 @@ function Game() {
       </div>
       <div className="game-info">
         <div>{status}</div>
-        {/* <ol>{moves}</ol> */}
+        <ol>{moves()}</ol>
       </div>
     </div>
   )
