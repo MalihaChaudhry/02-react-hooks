@@ -47,8 +47,7 @@ function Game() {
   const [currentlySelected, setCurrentlySelected] = useState(-1)
 
   function currentStep(i) {
-    setCurrentlySelected(i)
-    console.log({insideCurrentStep: currentlySelected, step: i})
+    setCurrentlySelected(i + 1)
     if (i < 0) return setSquares(Array(9).fill(null))
     return setSquares(history[i])
   }
@@ -57,26 +56,27 @@ function Game() {
     if (winner || squares[square]) return
     const squaresCopy = [...squares]
     squaresCopy[square] = nextValue
+    if (currentlySelected < history.length - 1) {
+      const truncatedHistory = history.splice(
+        0,
+        history.length - currentlySelected,
+      )
+      setHistory(truncatedHistory)
+    }
     setSquares(squaresCopy)
     const historyCopy = [...history]
     historyCopy.push(squaresCopy)
     setHistory(historyCopy)
     setCurrentlySelected(historyCopy.length)
-    console.log({
-      insideSelectSquare: currentlySelected,
-      historyLength: historyCopy.length,
-    })
   }
 
   function restart() {
     setSquares(Array(9).fill(null))
     setHistory([])
     setCurrentlySelected(-1)
-    console.log({insideRestart: currentlySelected})
   }
 
   function moves() {
-    // let text = ''
     const startButton = (
       <li key="0">
         <button
@@ -90,16 +90,18 @@ function Game() {
       </li>
     )
     const buttons = history.map((arr, i) => {
-      const isCurrentlySelected = currentlySelected === i
-      let isLastButton = i === history.length - 1
+      console.log({currentlySelected})
+      const isCurrentlySelected = currentlySelected === i + 1
+      let isLastButton = i === history.length - 1 && currentlySelected === -1
       const isDisabled = isCurrentlySelected || isLastButton
 
-      console.log(
-        `Button ${
-          i + 1
-        }: isCurrentlySelected=${isCurrentlySelected}, isLastButton=${isLastButton}, isDisabled=${isDisabled}`,
-      )
-      console.log({currentlySelected, historyLength: history.length})
+      console.log({
+        i,
+        history: history.length - 1,
+        currentlySelected,
+        isLastButton,
+        isDisabled,
+      })
 
       return (
         <li key={`${arr.toString()}-${i + 1}`}>
