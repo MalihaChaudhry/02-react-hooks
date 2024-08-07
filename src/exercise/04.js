@@ -44,10 +44,11 @@ function Game() {
   const status = calculateStatus(winner, squares, nextValue)
 
   const [history, setHistory] = useState([])
-  // const [currentlySelected, setCurrentlySelected] = useState(-2)
+  const [currentlySelected, setCurrentlySelected] = useState(-1)
 
   function currentStep(i) {
-    // setCurrentlySelected(i)
+    setCurrentlySelected(i)
+    console.log({insideCurrentStep: currentlySelected, step: i})
     if (i < 0) return setSquares(Array(9).fill(null))
     return setSquares(history[i])
   }
@@ -60,41 +61,50 @@ function Game() {
     const historyCopy = [...history]
     historyCopy.push(squaresCopy)
     setHistory(historyCopy)
+    setCurrentlySelected(historyCopy.length)
+    console.log({
+      insideSelectSquare: currentlySelected,
+      historyLength: historyCopy.length,
+    })
   }
 
   function restart() {
     setSquares(Array(9).fill(null))
+    setHistory([])
+    setCurrentlySelected(-1)
+    console.log({insideRestart: currentlySelected})
   }
 
   function moves() {
-    let text = ''
+    // let text = ''
     const startButton = (
       <li key="0">
         <button
-          disabled={history.length === 0}
+          disabled={currentlySelected === -1}
           onClick={() => {
-            // setCurrentIndex(-1)
             currentStep(-1)
           }}
         >
-          Go to game start {history.length === 0 ? `(current)` : ''}
+          Go to game start {currentlySelected === -1 ? `(current)` : ''}
         </button>
       </li>
     )
     const buttons = history.map((arr, i) => {
-      // setCurrentIndex(i)
-      let disabled = false
-      // if (i > length) disabled = true
-      if (i === 0) text = `Go to move #${i + 1}`
-      else text = `Go to move #${i + 1}`
-      if (history.length === i + 1) text += ' (current)'
-      // if (currentlySelected) text += ' (current)'
-      if (history.length === i + 1) disabled = true
-      // if (currentlySelected) disabled = true
+      const isCurrentlySelected = currentlySelected === i
+      let isLastButton = i === history.length - 1
+      const isDisabled = isCurrentlySelected || isLastButton
+
+      console.log(
+        `Button ${
+          i + 1
+        }: isCurrentlySelected=${isCurrentlySelected}, isLastButton=${isLastButton}, isDisabled=${isDisabled}`,
+      )
+      console.log({currentlySelected, historyLength: history.length})
+
       return (
         <li key={`${arr.toString()}-${i + 1}`}>
-          <button disabled={disabled} onClick={() => currentStep(i)}>
-            {text}
+          <button disabled={isDisabled} onClick={() => currentStep(i)}>
+            Go to move #{i + 1} {isDisabled ? '(current)' : ''}
           </button>
         </li>
       )
