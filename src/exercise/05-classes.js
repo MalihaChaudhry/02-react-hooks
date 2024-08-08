@@ -22,7 +22,7 @@ function Tilt({children}) {
 
   return (
     <div ref={tiltRef} className="tilt-root">
-      <div className="tilt-child">{this.props.children}</div>
+      <div className="tilt-child">{children}</div>
     </div>
   )
 }
