@@ -1,14 +1,13 @@
 // useState: tic tac toe
 // http://localhost:3000/isolated/exercise/04.js
 
-import {useState} from 'react'
 import {useLocalStorageState} from '../utils'
 
-function Board({onClick, squares}) {
+function Board({onClick, currentSquares}) {
   function renderSquare(i) {
     return (
       <button className="square" onClick={() => onClick(i)}>
-        {squares[i]}
+        {currentSquares[i]}
       </button>
     )
   }
@@ -35,96 +34,52 @@ function Board({onClick, squares}) {
 }
 
 function Game() {
-  const [squares, setSquares] = useLocalStorageState(
-    'game',
+  const [history, setHistory] = useLocalStorageState('history', [
     Array(9).fill(null),
-  )
-  const nextValue = calculateNextValue(squares)
-  const winner = calculateWinner(squares)
-  const status = calculateStatus(winner, squares, nextValue)
-
-  const [history, setHistory] = useState([])
-  const [currentlySelected, setCurrentlySelected] = useState(-1)
-
-  function currentStep(i) {
-    setCurrentlySelected(i + 1)
-    if (i < 0) return setSquares(Array(9).fill(null))
-    return setSquares(history[i])
-  }
+  ])
+  const [currentStep, setCurrentStep] = useLocalStorageState('currentStep', 0)
+  const currentSquares = history[currentStep]
+  const nextValue = calculateNextValue(currentSquares)
+  const winner = calculateWinner(currentSquares)
+  const status = calculateStatus(winner, currentSquares, nextValue)
 
   function selectSquare(square) {
-    if (winner || squares[square]) return
-    const squaresCopy = [...squares]
-    squaresCopy[square] = nextValue
-    if (currentlySelected < history.length - 1) {
-      const truncatedHistory = history.splice(
-        0,
-        history.length - currentlySelected,
-      )
-      setHistory(truncatedHistory)
-    }
-    setSquares(squaresCopy)
-    const historyCopy = [...history]
-    historyCopy.push(squaresCopy)
-    setHistory(historyCopy)
-    setCurrentlySelected(historyCopy.length)
+    if (winner || currentSquares[square]) return
+    const currentSquaresCopy = [...currentSquares]
+    currentSquaresCopy[square] = nextValue
+    const truncHistory = history.slice(0, currentStep + 1)
+    setHistory([...truncHistory, currentSquaresCopy])
+    setCurrentStep(truncHistory.length)
   }
 
   function restart() {
-    setSquares(Array(9).fill(null))
-    setHistory([])
-    setCurrentlySelected(-1)
+    setHistory([Array(9).fill(null)])
+    setCurrentStep(0)
   }
 
-  function moves() {
-    const startButton = (
-      <li key="0">
-        <button
-          disabled={currentlySelected === -1}
-          onClick={() => {
-            currentStep(-1)
-          }}
-        >
-          Go to game start {currentlySelected === -1 ? `(current)` : ''}
+  const moves = history.map((squares, step) => {
+    const text = step === 0 ? 'Go to game start' : `Go to move #${step}`
+    const onCurrentStep = currentStep === step
+    return (
+      <li key={step}>
+        <button disabled={onCurrentStep} onClick={() => setCurrentStep(step)}>
+          {text} {onCurrentStep ? '(current)' : null}
         </button>
       </li>
     )
-    const buttons = history.map((arr, i) => {
-      console.log({currentlySelected})
-      const isCurrentlySelected = currentlySelected === i + 1
-      let isLastButton = i === history.length - 1 && currentlySelected === -1
-      const isDisabled = isCurrentlySelected || isLastButton
-
-      console.log({
-        i,
-        history: history.length - 1,
-        currentlySelected,
-        isLastButton,
-        isDisabled,
-      })
-
-      return (
-        <li key={`${arr.toString()}-${i + 1}`}>
-          <button disabled={isDisabled} onClick={() => currentStep(i)}>
-            Go to move #{i + 1} {isDisabled ? '(current)' : ''}
-          </button>
-        </li>
-      )
-    })
-    return [startButton, ...buttons]
-  }
+  })
 
   return (
     <div className="game">
       <div className="game-board">
-        <Board onClick={selectSquare} squares={squares} />
+        <Board onClick={selectSquare} currentSquares={currentSquares} />
         <button className="restart" onClick={restart}>
           restart
         </button>
       </div>
       <div className="game-info">
         <div>{status}</div>
-        <ol>{moves()}</ol>
+        <ol>{moves}</ol>
       </div>
     </div>
   )
